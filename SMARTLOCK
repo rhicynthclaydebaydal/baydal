@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartStudy Lock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1F2A52;
+    --navy-light:#2E3B6E;
+    --sky:#4C7EFF;
+    --amber:#FFB648;
+    --amber-deep:#F4923C;
+    --cream:#FBF8F2;
+    --card:#FFFFFF;
+    --coral:#FF6F5E;
+    --mint:#3FAE7C;
+    --ink:#232323;
+    --ink-soft:#6B7080;
+    --line:#E7E2D8;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(76,126,255,0.08), transparent 40%),
+      radial-gradient(circle at 92% 85%, rgba(255,182,72,0.12), transparent 40%),
+      var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  h1,h2,h3,.brand{font-family:'Fredoka',sans-serif;}
+  button{font-family:'Inter',sans-serif;cursor:pointer;}
+  .app{max-width:1180px;margin:0 auto;padding:28px 20px 60px;position:relative;}
+
+  /* ---------- Language switcher ---------- */
+  .lang-switch{position:fixed;top:18px;right:20px;z-index:50;}
+  .lang-switch select{
+    appearance:none;-webkit-appearance:none;
+    padding:8px 30px 8px 14px;border-radius:999px;border:1px solid var(--line);
+    background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%236B7080"/></svg>') no-repeat right 12px center;
+    font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;font-family:'Inter';
+    box-shadow:0 6px 16px -8px rgba(31,42,82,0.25);
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-right:130px;}
+  .brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:600;color:var(--navy);}
+  .brand .app-logo{width:40px;height:40px;border-radius:12px;object-fit:cover;box-shadow:0 4px 10px rgba(31,42,82,0.15);}
+  .who{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-soft);flex-wrap:wrap;}
+  .pill{padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:13px;font-weight:500;color:var(--navy);cursor:pointer;transition:.15s;}
+  .pill:hover{border-color:var(--sky);color:var(--sky);}
+  .pill.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+  /* ---------- Login ---------- */
+  .center-stage{min-height:70vh;display:flex;align-items:center;justify-content:center;}
+  .login-card{background:var(--card);border-radius:24px;padding:44px 40px;width:100%;max-width:420px;box-shadow:0 20px 50px -20px rgba(31,42,82,0.25);text-align:center;}
+  .login-card .app-logo-large{width:120px;height:120px;border-radius:20px;object-fit:cover;margin:0 auto 18px;box-shadow:0 8px 20px rgba(31,42,82,0.2);}
+  .login-card h1{font-size:24px;margin:0 0 6px;color:var(--navy);}
+  .login-card p{color:var(--ink-soft);font-size:14px;margin:0 0 28px;line-height:1.5;}
+  .auth-btn{width:100%;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;margin-bottom:10px;transition:.15s;text-align:left;}
+  .auth-btn:hover{border-color:var(--sky);background:#F7FAFF;}
+  .auth-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+  .icon-g{background:#EA4335;}
+  .icon-f{background:#1877F2;}
+  .icon-m{background:#00A4EF;}
+  .icon-p{background:var(--mint);}
+  .phone-input{display:none;gap:8px;margin-top:10px;}
+  .phone-input input{flex:1;padding:11px 12px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-family:'Inter';}
+  .phone-input button{padding:11px 16px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-weight:600;font-size:14px;}
+
+  /* ---------- Role select ---------- */
+  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:640px;width:100%;}
+  .role-card{background:var(--card);border-radius:20px;padding:32px 24px;text-align:center;border:2px solid transparent;transition:.15s;box-shadow:0 12px 30px -18px rgba(31,42,82,0.2);}
+  .role-card:hover{border-color:var(--sky);transform:translateY(-2px);}
+  .role-card .ico{font-size:38px;margin-bottom:12px;}
+  .role-card h3{margin:0 0 6px;color:var(--navy);font-size:19px;}
+  .role-card p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.5;}
+
+  /* ---------- Layout ---------- */
+  .layout{display:grid;grid-template-columns:1fr;gap:24px;}
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:start;}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr;} .topbar{padding-right:0;flex-direction:column;align-items:flex-start;gap:12px;} .lang-switch{position:static;margin-bottom:16px;}}
+
+  .card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:0 10px 26px -20px rgba(31,42,82,0.3);border:1px solid var(--line);}
+  .card h2{font-size:17px;margin:0 0 4px;color:var(--navy);}
+  .card .sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 18px;}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:6px;}
+  input[type=time],input[type=number],input[type=text],select{
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-family:'Inter';background:#FDFCFA;
+  }
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .switch{position:relative;width:44px;height:25px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#DADFE8;border-radius:999px;transition:.2s;cursor:pointer;}
+  .slider:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+  .switch input:checked + .slider{background:var(--mint);}
+  .switch input:checked + .slider:before{transform:translateX(19px);}
+
+  .chip-input{display:flex;gap:8px;margin-bottom:10px;}
+  .chip-input input{flex:1;}
+  .chip-input button{padding:0 16px;border-radius:10px;border:none;background:var(--sky);color:#fff;font-weight:600;font-size:13px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{background:#EFF3FF;color:var(--navy);padding:6px 10px 6px 12px;border-radius:999px;font-size:12.5px;display:flex;align-items:center;gap:8px;font-weight:500;}
+  .chip button{background:none;border:none;color:var(--ink-soft);font-size:14px;line-height:1;}
+
+  /* Subject grouping styles */
+  .subject-section{margin-bottom:18px;border:1px solid var(--line);border-radius:12px;padding:14px;background:#FAFAFC;}
+  .subject-title{font-size:14px;font-weight:700;color:var(--sky);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+  
+  .qitem{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:#fff;}
+  .qitem .qtext{font-weight:600;font-size:13.5px;margin-bottom:6px;color:var(--ink);}
+  .qopts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px;}
+  .qopt{font-size:12px;padding:5px 8px;border-radius:6px;background:#F5F4F0;color:var(--ink-soft);}
+  .qopt.correct{background:#E4F6EC;color:var(--mint);font-weight:600;}
+  .qitem-foot{display:flex;justify-content:flex-end;}
+  .qitem-foot button{background:none;border:none;color:var(--coral);font-size:12px;font-weight:600;}
+
+  .btn-primary{width:100%;padding:12px;border-radius:12px;border:none;background:var(--navy);color:#fff;font-weight:600;font-size:14px;margin-top:4px;}
+  .btn-primary:hover{background:var(--navy-light);}
+
+  .newq-opt{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .newq-opt input[type=radio]{accent-color:var(--mint);width:16px;height:16px;}
+  .newq-opt input[type=text]{flex:1;}
+
+  .status-card{display:flex;align-items:center;gap:14px;}
+  .status-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .status-dot.locked{background:#FFEFE3;color:var(--amber-deep);}
+  .status-dot.unlocked{background:#E4F6EC;color:var(--mint);}
+  .status-text b{display:block;font-size:14.5px;color:var(--navy);}
+  .status-text span{font-size:12.5px;color:var(--ink-soft);}
+
+  /* ---------- Phone mock ---------- */
+  .phone-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;position:sticky;top:20px;}
+  .phone{width:290px;height:590px;background:var(--navy);border-radius:38px;padding:12px;box-shadow:0 30px 60px -25px rgba(31,42,82,0.5);position:relative;}
+  .phone .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:110px;height:20px;background:var(--navy);border-radius:0 0 14px 14px;z-index:3;}
+  .screen{background:#fff;width:100%;height:100%;border-radius:28px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+
+  .lockscreen{flex:1;background:linear-gradient(160deg,var(--navy) 0%,#141B38 100%);color:#fff;display:flex;flex-direction:column;align-items:center;padding:44px 22px 26px;text-align:center;}
+  .lockscreen .lockicon{width:52px;height:52px;border-radius:16px;background:rgba(255,182,72,0.18);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px;color:var(--amber);}
+  .lockscreen h3{margin:0 0 4px;font-size:16px;font-family:'Fredoka';}
+  .lockscreen p{margin:0 0 22px;font-size:12px;opacity:0.75;line-height:1.5;}
+  .qcard{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px;width:100%;text-align:left;}
+  .qcard .qlabel{font-size:10.5px;text-transform:none;color:var(--amber);font-weight:600;margin-bottom:6px;}
+  .qcard .qtext{font-size:14px;font-weight:600;margin-bottom:14px;line-height:1.4;}
+  .qcard .opt{width:100%;text-align:left;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:12.5px;margin-bottom:8px;transition:.15s;}
+  .qcard .opt:hover{background:rgba(255,255,255,0.16);}
+  .opt.right{background:var(--mint) !important;border-color:var(--mint) !important;}
+  .opt.wrong{background:var(--coral) !important;border-color:var(--coral) !important;}
+  .feedback{font-size:12px;margin-top:10px;min-height:16px;font-weight:600;}
+  .feedback.ok{color:var(--mint);}
+  .feedback.bad{color:#FFB2AA;}
+
+  .homescreen{flex:1;background:linear-gradient(160deg,#FFF7EA,#FFEFE0);display:flex;flex-direction:column;align-items:center;padding:40px 20px 20px;text-align:center;}
+  .homescreen .badge{background:var(--mint);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;margin-bottom:14px;}
+  .homescreen h3{margin:0 0 6px;color:var(--navy);font-family:'Fredoka';font-size:17px;}
+  .homescreen .timer{font-size:34px;font-weight:700;color:var(--amber-deep);font-family:'Fredoka';margin:10px 0 4px;}
+  .homescreen p{font-size:12px;color:var(--ink-soft);margin:0 0 18px;}
+  .applist{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;margin-top:auto;}
+  .appicon{aspect-ratio:1;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 6px 14px -8px rgba(0,0,0,0.15);}
+
+  .simbar{display:flex;gap:10px;}
+  .simbar button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;color:var(--navy);}
+  .simbar button:hover{border-color:var(--sky);color:var(--sky);}
+
+  .empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:20px 0;}
+  .hidden{display:none !important;}
+  .footnote{text-align:center;font-size:11.5px;color:var(--ink-soft);margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="lang-switch" id="langSwitch"></div>
+<div class="app" id="app"></div>
+
+<script>
+const APP_LOGO = "lock logo.jpg";
+
+const LANGS = {
+  en: "🇬🇧 English",
+  fil:"🇵🇭 Filipino",
+  ceb:"🇵🇭 Cebuano",
+  es: "🇪🇸 Español",
+  zh: "🇨🇳 中文"
+};
+
+const I18N = {
+  en: {
+    tagline: "Sign in with your family account to start the parallel app for parent and child.",
+    gmail: "Continue with Gmail",
+    facebook: "Continue with Facebook",
+    microsoft: "Continue with Microsoft",
+    usePhone: "Use Phone Number",
+    phonePlaceholder: "09xx xxx xxxx",
+    send: "Send",
+    signedInWith: "Signed in with",
+    logout: "Logout",
+    roleGuardianTitle: "I'm the Parent / Guardian",
+    roleGuardianDesc: "Set lock times, add questions by subject, and set reward time.",
+    roleChildTitle: "I'm the Child / Student",
+    roleChildDesc: "Answer elementary questions to unlock the phone and earn extra time.",
+    tabGuardian: "Guardian",
+    tabChild: "Kid",
+    statusLockedTitle: "Phone is locked right now",
+    statusLockedDesc: "An elementary question must be answered to unlock.",
+    statusUnlockedTitle: "Phone is unlocked right now",
+    statusUnlockedBonusDesc: "Bonus time is active — it will auto-lock when it runs out.",
+    statusUnlockedNoneDesc: "No lock scheduled right now.",
+    lockTimeTitle: "Lock Schedule",
+    lockTimeSub: "Set when the phone should auto-lock for study time.",
+    enableSchedule: "Enable scheduled lock",
+    startLabel: "Start",
+    endLabel: "End",
+    rewardLabel: "Reward time for a correct answer (minutes)",
+    saveSettings: "Save Settings",
+    blockedAppsTitle: "Blocked Apps",
+    blockedAppsSub: "These apps are unavailable while the phone is locked.",
+    addAppPlaceholder: "e.g. YouTube",
+    add: "Add",
+    noApps: "No blocked apps yet.",
+    addQuestionTitle: "Add Elementary Question",
+    addQuestionSub: "Choose a subject and add a question for the lock screen.",
+    subjectLabel: "Subject",
+    questionLabel: "Question",
+    questionPlaceholder: "Type the question here",
+    answerA: "Answer A", answerB: "Answer B", answerC: "Answer C", answerD: "Answer D",
+    correctHint: "Select the circle next to the correct answer.",
+    addQuestionBtn: "Add Question",
+    questionListTitle: "Elementary Questions by Subject",
+    noQuestions: "No questions yet. Add one above.",
+    remove: "Remove",
+    lockedTitle: "Phone is Locked",
+    lockedDesc: "Study time first! Answer the elementary question to earn extra time.",
+    questionTag: "QUESTION",
+    noQuestionDesc: "Guardian hasn't set any questions yet. Please wait.",
+    unlockedBadge: "UNLOCKED",
+    correctTitle: "Nice! Correct answer",
+    bonusTimeLeft: "bonus time remaining",
+    freeUse: "Free to use the phone for now.",
+    simTitle: "Simulate (for demo)",
+    simDesc: "Use these buttons to preview the full flow.",
+    lockNow: "Lock Now",
+    removeLock: "Remove Lock",
+    correctFeedback: "Correct! +{n} minutes bonus.",
+    wrongFeedback: "Wrong. Try again — new question."
+  },
+  fil: {
+    tagline: "Mag-log in gamit ang account ng pamilya para simulan ang parallel na app para sa magulang at anak.",
+    gmail: "Ipagpatuloy gamit ang Gmail",
+    facebook: "Ipagpatuloy gamit ang Facebook",
+    microsoft: "Ipagpatuloy gamit ang Microsoft",
+    usePhone: "Gumamit ng Phone Number",
+    phonePlaceholder: "09xx xxx xxxx",
+    send: "Ipadala",
+    signedInWith: "Naka-login gamit ang",
+    logout: "Logout",
+    roleGuardianTitle: "Ako ang Magulang / Guardian",
+    roleGuardianDesc: "Mag-set ng lock, magdagdag ng tanong ayon sa subject, at reward time.",
+    roleChildTitle: "Ako ang Bata / Estudyante",
+    roleChildDesc: "Sagutan ang mga tanong sa elementary para ma-unlock ang phone.",
+    tabGuardian: "Guardian",
+    tabChild: "Bata",
+    statusLockedTitle: "Naka-lock ang phone ngayon",
+    statusLockedDesc: "Kailangan sagutin ang tanong sa elementary para mag-unlock.",
+    statusUnlockedTitle: "Naka-unlock ang phone ngayon",
+    statusUnlockedBonusDesc: "May bonus time — mag-a-auto lock pag naubos.",
+    statusUnlockedNoneDesc: "Wala pang naka-schedule na lock ngayon.",
+    lockTimeTitle: "Oras ng Pag-lock",
+    lockTimeSub: "Itakda kung kailan mag-a-auto lock ang phone.",
+    enableSchedule: "Paganahin ang naka-schedule na lock",
+    startLabel: "Simula",
+    endLabel: "Hanggang",
+    rewardLabel: "Reward na oras kapag tama ang sagot (minuto)",
+    saveSettings: "I-save ang Setting",
+    blockedAppsTitle: "Naka-block na Apps",
+    blockedAppsSub: "Ang mga app na ito ay hindi magagamit habang naka-lock.",
+    addAppPlaceholder: "hal. YouTube",
+    add: "Idagdag",
+    noApps: "Wala pang app na naka-block.",
+    addQuestionTitle: "Magdagdag ng Tanong sa Elementary",
+    addQuestionSub: "Pumili ng subject at magdagdag ng tanong para sa lock screen.",
+    subjectLabel: "Subject",
+    questionLabel: "Tanong",
+    questionPlaceholder: "Itype ang tanong dito",
+    answerA: "Sagot A", answerB: "Sagot B", answerC: "Sagot C", answerD: "Sagot D",
+    correctHint: "Piliin ang bilog sa tabi ng tamang sagot.",
+    addQuestionBtn: "Idagdag ang Tanong",
+    questionListTitle: "Mga Tanong sa Elementary ayon sa Subject",
+    noQuestions: "Wala pang tanong. Magdagdag sa itaas.",
+    remove: "Alisin",
+    lockedTitle: "Naka-lock ang Phone",
+    lockedDesc: "Study time muna! Sagutin ang tanong sa elementary para makakuha ng extra na oras.",
+    questionTag: "TANONG",
+    noQuestionDesc: "Wala pang tanong na naka-set ng guardian. Hintayin muna.",
+    unlockedBadge: "NAKA-UNLOCK",
+    correctTitle: "Galing! Tama ang sagot mo",
+    bonusTimeLeft: "natitirang bonus na oras",
+    freeUse: "Malayang gamitin ang phone sa ngayon.",
+    simTitle: "Simulate (para sa demo)",
+    simDesc: "Gamitin ang mga button na ito para tignan ang buong daloy.",
+    lockNow: "I-lock Ngayon",
+    removeLock: "Tanggalin ang Lock",
+    correctFeedback: "Tama! +{n} minutong extra time.",
+    wrongFeedback: "Mali. Subukan ulit — bagong tanong."
+  },
+  ceb: {
+    tagline: "Mag-login gamit ang account sa pamilya aron masugdan ang parallel nga app.",
+    gmail: "Padayon gamit ang Gmail",
+    facebook: "Padayon gamit ang Facebook",
+    microsoft: "Padayon gamit ang Microsoft",
+    usePhone: "Gamiton ang Phone Number",
+    phonePlaceholder: "09xx xxx xxxx",
+    send: "Ipadala",
+    signedInWith: "Naka-login gamit ang",
+    logout: "Logout",
+    roleGuardianTitle: "Ako ang Ginikanan / Guardian",
+    roleGuardianDesc: "I-set ang oras sa pag-lock, pagdugang og mga pangutana base sa subject.",
+    roleChildTitle: "Ako ang Bata / Estudyante",
+    roleChildDesc: "Tubaga ang mga pangutana sa elementary aron ma-unlock ang phone.",
+    tabGuardian: "Guardian",
+    tabChild: "Bata",
+    statusLockedTitle: "Naka-lock ang phone karon",
+    statusLockedDesc: "Kinahanglan tubagon ang pangutana sa elementary aron ma-unlock.",
+    statusUnlockedTitle: "Naka-unlock ang phone karon",
+    statusUnlockedBonusDesc: "Aktibo ang bonus time — automatic ma-lock kung mahurot na.",
+    statusUnlockedNoneDesc: "Walay naka-schedule nga lock karon.",
+    lockTimeTitle: "Schedule sa Pag-lock",
+    lockTimeSub: "I-set kung kanus-a mag-auto lock ang phone.",
+    enableSchedule: "I-enable ang naka-schedule nga lock",
+    startLabel: "Sugod",
+    endLabel: "Hangtod",
+    rewardLabel: "Reward nga oras kung tama ang tubag (minuto)",
+    saveSettings: "I-save ang Setting",
+    blockedAppsTitle: "Naka-block nga mga App",
+    blockedAppsSub: "Kini nga mga app dili magamit samtang naka-lock.",
+    addAppPlaceholder: "pananglitan YouTube",
+    add: "Idugang",
+    noApps: "Wala pay naka-block nga app.",
+    addQuestionTitle: "Pagdugang og Pangutana sa Elementary",
+    addQuestionSub: "Pilia ang subject ug pagdugang og pangutana.",
+    subjectLabel: "Subject",
+    questionLabel: "Pangutana",
+    questionPlaceholder: "I-type ang pangutana diri",
+    answerA: "Tubag A", answerB: "Tubag B", answerC: "Tubag C", answerD: "Tubag D",
+    correctHint: "Pilia ang lingin tapad sa tama nga tubag.",
+    addQuestionBtn: "Idugang ang Pangutana",
+    questionListTitle: "Listahan sa mga Pangutana base sa Subject",
+    noQuestions: "Wala pay pangutana. Pagdugang sa taas.",
+    remove: "Kuhaon",
+    lockedTitle: "Naka-lock ang Phone",
+    lockedDesc: "Study time una! Tubaga ang pangutana sa elementary.",
+    questionTag: "PANGUTANA",
+    noQuestionDesc: "Wala pay pangutana nga gi-set sa guardian.",
+    unlockedBadge: "NAKA-UNLOCK",
+    correctTitle: "Maayo! Tama ang imong tubag",
+    bonusTimeLeft: "nabilin nga bonus nga oras",
+    freeUse: "Libre nga gamiton ang phone karon.",
+    simTitle: "Simulate (para sa demo)",
+    simDesc: "Gamita kini nga mga buton aron makita ang tibuok proseso.",
+    lockNow: "I-lock Karon",
+    removeLock: "Kuhaon ang Lock",
+    correctFeedback: "Tama! +{n} minuto nga bonus.",
+    wrongFeedback: "Sayop. Sulayi pag-usab — bag-ong pangutana."
+  },
+  es: {
+    tagline: "Inicia sesión con tu cuenta familiar.",
+    gmail: "Continuar con Gmail",
+    facebook: "Continuar con Facebook",
+    microsoft: "Continuar con Microsoft",
+    usePhone: "Usar número de teléfono",
+    phonePlaceholder: "09xx xxx xxxx",
+    send: "Enviar",
+    signedInWith: "Sesión iniciada con",
+    logout: "Cerrar sesión",
+    roleGuardianTitle: "Soy el Padre / Tutor",
+    roleGuardianDesc: "Configura horarios y preguntas de primaria por materia.",
+    roleChildTitle: "Soy el Hijo / Estudiante",
+    roleChildDesc: "Responde preguntas de primaria para desbloquear.",
+    tabGuardian: "Tutor",
+    tabChild: "Niño",
+    statusLockedTitle: "El teléfono está bloqueado ahora",
+    statusLockedDesc: "Responde una pregunta de primaria para desbloquear.",
+    statusUnlockedTitle: "El teléfono está desbloqueado ahora",
+    statusUnlockedBonusDesc: "El tiempo extra está activo.",
+    statusUnlockedNoneDesc: "No hay bloqueo programado.",
+    lockTimeTitle: "Horario de Bloqueo",
+    lockTimeSub: "Define cuándo se bloquea el teléfono.",
+    enableSchedule: "Activar bloqueo programado",
+    startLabel: "Inicio",
+    endLabel: "Fin",
+    rewardLabel: "Tiempo de recompensa (minutos)",
+    saveSettings: "Guardar Ajustes",
+    blockedAppsTitle: "Aplicaciones Bloqueadas",
+    blockedAppsSub: "Apps no disponibles durante el bloqueo.",
+    addAppPlaceholder: "ej. YouTube",
+    add: "Agregar",
+    noApps: "Aún no hay apps bloqueadas.",
+    addQuestionTitle: "Agregar Pregunta de Primaria",
+    addQuestionSub: "Elige una materia y añade la pregunta.",
+    subjectLabel: "Materia",
+    questionLabel: "Pregunta",
+    questionPlaceholder: "Escribe la pregunta aquí",
+    answerA: "Respuesta A", answerB: "Respuesta B", answerC: "Respuesta C", answerD: "Respuesta D",
+    correctHint: "Selecciona el círculo junto a la respuesta correcta.",
+    addQuestionBtn: "Agregar Pregunta",
+    questionListTitle: "Preguntas de Primaria por Materia",
+    noQuestions: "Aún no hay preguntas.",
+    remove: "Quitar",
+    lockedTitle: "Teléfono Bloqueado",
+    lockedDesc: "¡Primero estudia respondiendo la pregunta!",
+    questionTag: "PREGUNTA",
+    noQuestionDesc: "El tutor aún no configura preguntas.",
+    unlockedBadge: "DESBLOQUEADO",
+    correctTitle: "¡Bien! Respuesta correcta",
+    bonusTimeLeft: "tiempo extra restante",
+    freeUse: "Puedes usar el teléfono libremente.",
+    simTitle: "Simular (para demo)",
+    simDesc: "Usa estos botones para previsualizar.",
+    lockNow: "Bloquear Ahora",
+    removeLock: "Quitar Bloqueo",
+    correctFeedback: "¡Correcto! +{n} minutos.",
+    wrongFeedback: "Incorrecto. Intenta de nuevo."
+  },
+  zh: {
+    tagline: "使用家庭账户登录。",
+    gmail: "使用 Gmail 继续",
+    facebook: "使用 Facebook 继续",
+    microsoft: "使用 Microsoft 继续",
+    usePhone: "使用手机号码",
+    phonePlaceholder: "09xx xxx xxxx",
+    send: "发送",
+    signedInWith: "已使用以下方式登录：",
+    logout: "退出登录",
+    roleGuardianTitle: "我是家长 / 监护人",
+    roleGuardianDesc: "按科目设置小学锁屏题目与奖励时间。",
+    roleChildTitle: "我是孩子 / 学生",
+    roleChildDesc: "回答小学题目以解锁手机。",
+    tabGuardian: "家长",
+    tabChild: "孩子",
+    statusLockedTitle: "手机目前已锁定",
+    statusLockedDesc: "需回答小学题目才能解锁。",
+    statusUnlockedTitle: "手机目前已解锁",
+    statusUnlockedBonusDesc: "奖励时间生效中。",
+    statusUnlockedNoneDesc: "目前没有安排锁定。",
+    lockTimeTitle: "锁定时间安排",
+    lockTimeSub: "设置手机锁定时间段。",
+    enableSchedule: "启用定时锁定",
+    startLabel: "开始",
+    endLabel: "结束",
+    rewardLabel: "答对奖励时间（分钟）",
+    saveSettings: "保存设置",
+    blockedAppsTitle: "已屏蔽的应用",
+    blockedAppsSub: "锁定期间无法使用的应用。",
+    addAppPlaceholder: "例如 YouTube",
+    add: "添加",
+    noApps: "暂无屏蔽应用。",
+    addQuestionTitle: "添加小学题目",
+    addQuestionSub: "选择科目并添加锁屏问题。",
+    subjectLabel: "科目",
+    questionLabel: "问题",
+    questionPlaceholder: "在此输入问题",
+    answerA: "答案 A", answerB: "答案 B", answerC: "答案 C", answerD: "答案 D",
+    correctHint: "选择正确答案旁边的圆圈。",
+    addQuestionBtn: "添加问题",
+    questionListTitle: "按科目分类的小学题目",
+    noQuestions: "暂无题目。",
+    remove: "移除",
+    lockedTitle: "手机已锁定",
+    lockedDesc: "先学习！回答小学题目以获得时间。",
+    questionTag: "问题",
+    noQuestionDesc: "家长尚未设置题目。",
+    unlockedBadge: "已解锁",
+    correctTitle: "回答正确！",
+    bonusTimeLeft: "剩余奖励时间",
+    freeUse: "目前可以自由使用手机。",
+    simTitle: "模拟演示",
+    simDesc: "使用以下按钮预览流程。",
+    lockNow: "立即锁定",
+    removeLock: "解除锁定",
+    correctFeedback: "正确！奖励 {n} 分钟。",
+    wrongFeedback: "回答错误，请重试。"
+  }
+};
+
+const SUBJECTS_TRANSLATIONS = {
+  Math: { en: "Mathematics (Math)", fil: "Matematika (Math)", ceb: "Matematika (Math)", es: "Matemáticas", zh: "数学" },
+  Science: { en: "Science", fil: "Agham (Science)", ceb: "Syensya (Science)", es: "Ciencias", zh: "科学" },
+  English: { en: "English", fil: "Wikang Ingles (English)", ceb: "English", es: "Inglés", zh: "英语" },
+  AP: { en: "Araling Panlipunan (Social Studies)", fil: "Araling Panlipunan (Social Studies)", ceb: "Araling Panlipunan", es: "Estudios Sociales", zh: "社会学" }
+};
+
+let currentLang = 'en';
+function t(key){ return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key; }
+function getSubjectName(subjKey){
+  const sub = SUBJECTS_TRANSLATIONS[subjKey];
+  if(!sub) return subjKey;
+  return sub[currentLang] || sub.en || subjKey;
+}
+
+function renderLangSwitch(){
+  const el = document.getElementById('langSwitch');
+  el.innerHTML = `<select id="langSelect">${Object.keys(LANGS).map(code=>`<option value="${code}" ${code===currentLang?'selected':''}>${LANGS[code]}</option>`).join('')}</select>`;
+  document.getElementById('langSelect').addEventListener('change', (e)=>{
+    currentLang = e.target.value;
+    document.documentElement.lang = currentLang;
+    render();
+  });
+}
+
+/* ---------------- Expanded Default Data with Many Elementary Questions ---------------- */
+const DEFAULT_DATA = {
+  guardianName: null,
+  childName: null,
+  schedule: { enabled: true, start: "19:00", end: "20:30" },
+  rewardMinutes: 15,
+  blockedApps: ["YouTube","TikTok","Games","Messenger"],
+  questions: [
+    // Mathematics
+    { id: 1, subject: "Math", textByLang: {en:"What is 8 multiplied by 7?", fil:"Ano ang 8 iminusply sa 7?", ceb:"Pila ang 8 multiplied by 7?", es:"¿Cuánto es 8 por 7?", zh:"8 乘以 7 等于多少？"}, options: ["54","56","64","49"], correct: 1 },
+    { id: 2, subject: "Math", textByLang: {en:"How many sides does a triangle have?", fil:"Ilang gilid o sides mayroon ang isang tatsulok (triangle)?", ceb:"Pila ka kilid o sides naa ang triangle?", es:"¿Cuántas lados tiene un triángulo?", zh:"三角形有多少条边？"}, options: ["3","4","5","6"], correct: 0 },
+    { id: 3, subject: "Math", textByLang: {en:"What is 145 plus 230?", fil:"Ano ang kabuuan ng 145 at 230?", ceb:"Pila ang 145 plus 230?", es:"¿Cuánto es 145 más 230?", zh:"145 加 230 是多少？"}, options: ["365","375","355","385"], correct: 0 },
+    { id: 4, subject: "Math", textByLang: {en:"If you have 12 apples and you ate 4, how many are left?", fil:"Kung ikaw ay may 12 mansanas at kumain ka ng 4, ilan ang natira?", ceb:"Kung naa kay 12 ka mansanas ug gikaon nimo ang 4, pila ang nahabilin?", es:"Si tienes 12 manzanas y te comes 4, ¿cuántas quedan?", zh:"如果你有12个苹果，吃了4个，还剩几个？"}, options: ["6","7","8","9"], correct: 2 },
+    { id: 5, subject: "Math", textByLang: {en:"What is 81 divided by 9?", fil:"Ano ang 81 hinati sa 9?", ceb:"Pila ang 81 bahin sa 9?", es:"¿Cuánto es 81 dividido entre 9?", zh:"81 除以 9 等于多少？"}, options: ["7","8","9","6"], correct: 2 },
+
+    // Science
+    { id: 6, subject: "Science", textByLang: {en:"What planet is closest to the Sun?", fil:"Aling planeta ang pinakamalapit sa Araw?", ceb:"Unsang planeta ang pinakaduol sa Adlaw?", es:"¿Qué planeta está más cerca del Sol?", zh:"哪颗行星距离太阳最近？"}, options: ["Venus","Mars","Mercury","Earth"], correct: 2 },
+    { id: 7, subject: "Science", textByLang: {en:"What gas do humans need to breathe in to live?", fil:"Anong gas ang kailangan hingahan ng tao para mabuhay?", ceb:"Unsang gas ang kinahanglanginhawa sa tawo aron the buhay?", es:"¿Qué gas necesitamos respirar para vivir?", zh:"人类生存需要呼吸什么气体？"}, options: ["Carbon Dioxide","Oxygen","Nitrogen","Helium"], correct: 1 },
+    { id: 8, subject: "Science", textByLang: {en:"What is the main source of energy for the Earth?", fil:"Ano ang pangunahing pinkukunan ng enerhiya ng Mundo?", ceb:"Unsa ang pangunang gigikanan sa enerhiya sa Yuta?", es:"¿Cuál es la principal fuente de energía de la Tierra?", zh:"地球能量的主要来源是什么？"}, options: ["The Moon","The Sun","Wind","Water"], correct: 1 },
+    { id: 9, subject: "Science", textByLang: {en:"Which animal is known as the king of the jungle?", fil:"Anong hayop ang tinatawag na hari ng kagubatan?", ceb:"Unsang hayopa ang nailhan nga hari sa kalasangan?", es:"¿Qué animal es conocido como el rey de la selva?", zh:"哪种动物被称为森林之王？"}, options: ["Elephant","Tiger","Lion","Cheetah"], correct: 2 },
+    { id: 10, subject: "Science", textByLang: {en:"What state of matter is ice?", fil:"Anong estado ng matter ang yelo?", ceb:"Unsang matang state of matter ang yelo?", es:"¿Qué estado de la materia es el hielo?", zh:"冰是什么物质状态？"}, options: ["Solid","Liquid","Gas","Plasma"], correct: 0 },
+
+    // English
+    { id: 11, subject: "English", textByLang: {en:"Which of the following is a noun?", fil:"Alin sa mga sumusunod ang pangngalan (noun)?", ceb:"Hain sa mosunod ang noun o pulong-ngalan?", es:"¿Cuál de los siguientes es un sustantivo?", zh:"以下哪个是名词？"}, options: ["Run","Happy","Apple","Quickly"], correct: 2 },
+    { id: 12, subject: "English", textByLang: {en:"What is the past tense of the verb 'eat'?", fil:"Ano ang past tense ng salitang 'eat'?", ceb:"Unsa ang past tense sa berbo nga 'eat'?", es:"¿Cuál es el pasado del verbo 'eat' (comer)?", zh:"动词 'eat' 的过去式是什么？"}, options: ["Eated","Ate","Eats","Eating"], correct: 1 },
+    { id: 13, subject: "English", textByLang: {en:"Choose the correct spelling:", fil:"Piliin ang tamang baybay:", ceb:"Pilia ang saktong spelling:", es:"Elija la ortografía correcta:", zh:"选择正确的拼写："}, options: ["Bicause","Because","Becaus","Becouse"], correct: 1 },
+    { id: 14, subject: "English", textByLang: {en:"What is the opposite of the word 'hot'?", fil:"Ano ang kasalungat ng salitang 'mainit' (hot)?", ceb:"Unsa ang sukwahi sa pulong nga 'init' (hot)?", zh:"'hot'（热）的反义词是什么？"}, options: ["Warm","Cold","Boiling","Sunny"], correct: 1 },
+    { id: 15, subject: "English", textByLang: {en:"Which word is an adjective (pang-uri)?", fil:"Aling salita ang pang-uri (adjective)?", ceb:"Hain nga pulong ang adjective o hiyas?", zh:"哪个词是形容词？"}, options: ["Jump","Beautiful","Table","Swiftly"], correct: 1 },
+
+    // Araling Panlipunan (Social Studies)
+    { id: 16, subject: "AP", textByLang: {en:"Who is the national hero of the Philippines?", fil:"Sino ang pambansang bayani ng Pilipinas?", ceb:"Kinsa ang national hero sa Pilipinas?", es:"¿Quién es el héroe nacional de Filipinas?", zh:"谁是菲律宾的民族英雄？"}, options: ["Andres Bonifacio","Jose Rizal","Emilio Aguinaldo","Apolinario Mabini"], correct: 1 },
+    { id: 17, subject: "AP", textByLang: {en:"How many main administrative regions are there in the Philippines?", fil:"Ilang pangunahing rehiyon ang meron sa Pilipinas?", ceb:"Pila ka rehiyon naa sa Pilipinas?", es:"¿Cuántas regiones principales hay en Filipinas?", zh:"菲律宾有多少个主要行政区？"}, options: ["12","15","17","20"], correct: 2 },
+    { id: 18, subject: "AP", textByLang: {en:"What is the capital city of the Philippines?", fil:"Ano ang kabiserang lungsod ng Pilipinas?", ceb:"Unsa ang kapital nga syudad sa Pilipinas?", es:"¿Cuál es la capital de Filipinas?", zh:"菲律宾的首都是哪里？"}, options: ["Quezon City","Manila","Cebu City","Davao City"], correct: 1 },
+    { id: 19, subject: "AP", textByLang: {en:"What is the national flag color that represents peace in the Philippines flag?", fil:"Anong kulay sa watawat ng Pilipinas ang sumisimbolo sa kapayapaan?", ceb:"Unsang kolor sa bandila sa Pilipinas ang nagrepresentar sa kalinawan?", es:"¿Qué color de la bandera representa la paz?", zh:"菲律宾国旗中代表和平的颜色是什么？"}, options: ["Blue","Red","White","Yellow"], correct: 2 },
+    { id: 20, subject: "AP", textByLang: {en:"Who wrote the Philippine national anthem lyrics (from 'Filipinas poem')?", fil:"Sino ang sumulat ng titik ng pambansang awit ng Pilipinas?", ceb:"Kinsa ang nagsulat sa lyrics sa pambansang awit sa Pilipinas?", es:"¿Quién escribió la letra del himno nacional?", zh:"谁写了菲律宾国歌的歌词？"}, options: ["Julian Felipe","Jose Palma","Emilio Jacinto","Juan Luna"], correct: 1 }
+  ],
+  session: { unlockedUntil: null, forceLocked: false }
+};
+
+let data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let auth = null;
+let role = null;
+let currentQuestionId = null;
+let storageOk = true;
+
+async function loadData(){
+  try{
+    const res = await window.storage.get('ssl_data', true);
+    if(res && res.value){ data = JSON.parse(res.value); }
+  }catch(e){}
+}
+async function saveData(){
+  try{
+    await window.storage.set('ssl_data', JSON.stringify(data), true);
+  }catch(e){ storageOk = false; }
+}
+
+function pad(n){return n.toString().padStart(2,'0');}
+function nowHM(){ const d=new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); }
+function inWindow(start,end,cur){
+  if(start<=end) return cur>=start && cur<end;
+  return cur>=start || cur<end;
+}
+function isLockedNow(){
+  if(data.session.unlockedUntil && Date.now() < data.session.unlockedUntil) return false;
+  if(data.session.unlockedUntil && Date.now() >= data.session.unlockedUntil){ data.session.unlockedUntil = null; }
+  if(data.session.forceLocked) return true;
+  if(!data.schedule.enabled) return false;
+  return inWindow(data.schedule.start, data.schedule.end, nowHM());
+}
+function pickQuestion(){
+  if(data.questions.length===0) return null;
+  const q = data.questions[Math.floor(Math.random()*data.questions.length)];
+  currentQuestionId = q.id;
+  return q;
+}
+function qText(q){
+  if(q.textByLang) return q.textByLang[currentLang] || q.textByLang.en || q.text || '';
+  return q.text || '';
+}
+function fmtCountdown(ms){
+  const s = Math.max(0,Math.floor(ms/1000));
+  const m = Math.floor(s/60), sec = s%60;
+  return pad(m)+":"+pad(sec);
+}
+
+function render(){
+  renderLangSwitch();
+  const app = document.getElementById('app');
+  if(!auth){ app.innerHTML = loginScreen(); attachLogin(); return; }
+  if(!role){ app.innerHTML = roleScreen(); attachRole(); return; }
+  app.innerHTML = shell();
+  attachShell();
+}
+
+function loginScreen(){
+  return `
+  <div class="center-stage">
+    <div class="login-card">
+      <img src="${APP_LOGO}" class="app-logo-large" alt="Logo">
+      <h1>SmartStudy Lock</h1>
+      <p>${t('tagline')}</p>
+      <button class="auth-btn" data-provider="gmail"><span class="auth-icon icon-g">G</span> ${t('gmail')}</button>
+      <button class="auth-btn" data-provider="facebook"><span class="auth-icon icon-f">f</span> ${t('facebook')}</button>
+      <button class="auth-btn" data-provider="microsoft"><span class="auth-icon icon-m">M</span> ${t('microsoft')}</button>
+      <button class="auth-btn" id="phoneToggle"><span class="auth-icon icon-p">#</span> ${t('usePhone')}</button>
+      <div class="phone-input" id="phoneInput">
+        <input type="text" id="phoneNumber" placeholder="${t('phonePlaceholder')}">
+        <button id="phoneGo">${t('send')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+function attachLogin(){
+  document.querySelectorAll('.auth-btn[data-provider]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = btn.dataset.provider;
+      const labels = {gmail:"Gmail",facebook:"Facebook",microsoft:"Microsoft"};
+      auth = { provider:p, label: labels[p] };
+      render();
+    });
+  });
+  const toggle = document.getElementById('phoneToggle');
+  const box = document.getElementById('phoneInput');
+  toggle.addEventListener('click', ()=>{
+    box.style.display = box.style.display==='flex' ? 'none' : 'flex';
+  });
+  document.getElementById('phoneGo').addEventListener('click', ()=>{
+    const val = document.getElementById('phoneNumber').value.trim();
+    auth = { provider:'phone', label: val ? val : 'Phone number' };
+    render();
+  });
+}
+
+function roleScreen(){
+  return `
+  <div class="topbar">
+    <div class="brand"><img src="${APP_LOGO}" class="app-logo" alt="Logo"> SmartStudy Lock</div>
+    <div class="who">${t('signedInWith')} ${auth.label} <span class="pill" id="logout">${t('logout')}</span></div>
+  </div>
+  <div class="center-stage">
+    <div class="role-grid">
+      <div class="role-card" data-role="guardian">
+        <div class="ico">👨‍👩‍👧</div>
+        <h3>${t('roleGuardianTitle')}</h3>
+        <p>${t('roleGuardianDesc')}</p>
+      </div>
+      <div class="role-card" data-role="child">
+        <div class="ico">📱</div>
+        <h3>${t('roleChildTitle')}</h3>
+        <p>${t('roleChildDesc')}</p>
+      </div>
+    </div>
+  </div>`;
+}
+function attachRole(){
+  document.getElementById('logout').addEventListener('click', ()=>{ auth=null; role=null; render(); });
+  document.querySelectorAll('.role-card').forEach(c=>{
+    c.addEventListener('click', ()=>{ role = c.dataset.role; render(); });
+  });
+}
+
+function shell(){
+  const header = `
+  <div class="topbar">
+    <div class="brand"><img src="${APP_LOGO}" class="app-logo" alt="Logo"> SmartStudy Lock</div>
+    <div class="who">
+      ${auth.label} ·
+      <span class="pill ${role==='guardian'?'active':''}" data-switch="guardian">${t('tabGuardian')}</span>
+      <span class="pill ${role==='child'?'active':''}" data-switch="child">${t('tabChild')}</span>
+      <span class="pill" id="logout2">${t('logout')}</span>
+    </div>
+  </div>`;
+  return header + (role==='guardian' ? guardianView() : childView());
+}
+function attachShell(){
+  document.getElementById('logout2').addEventListener('click', ()=>{ auth=null; role=null; render(); });
+  document.querySelectorAll('[data-switch]').forEach(el=>{
+    el.addEventListener('click', ()=>{ role = el.dataset.switch; render(); });
+  });
+  if(role==='guardian') attachGuardian(); else attachChild();
+}
+
+function guardianView(){
+  const locked = isLockedNow();
+
+  const subjectsList = ["Math", "Science", "English", "AP"];
+  const grouped = {};
+  subjectsList.forEach(s => grouped[s] = []);
+  data.questions.forEach(q => {
+    const subj = q.subject && grouped[q.subject] ? q.subject : "Math";
+    grouped[subj].push(q);
+  });
+
+  return `
+  <div class="grid2">
+    <div style="display:flex;flex-direction:column;gap:22px;">
+      <div class="card status-card">
+        <div class="status-dot ${locked?'locked':'unlocked'}">${locked?'🔒':'🔓'}</div>
+        <div class="status-text">
+          <b>${locked ? t('statusLockedTitle') : t('statusUnlockedTitle')}</b>
+          <span>${locked ? t('statusLockedDesc') : (data.session.unlockedUntil ? t('statusUnlockedBonusDesc') : t('statusUnlockedNoneDesc'))}</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>${t('lockTimeTitle')}</h2>
+        <p class="sub">${t('lockTimeSub')}</p>
+        <div class="toggle-row">
+          <label style="margin:0;">${t('enableSchedule')}</label>
+          <label class="switch"><input type="checkbox" id="schedEnabled" ${data.schedule.enabled?'checked':''}><span class="slider"></span></label>
+        </div>
+        <div class="row">
+          <div><label>${t('startLabel')}</label><input type="time" id="startTime" value="${data.schedule.start}"></div>
+          <div><label>${t('endLabel')}</label><input type="time" id="endTime" value="${data.schedule.end}"></div>
+        </div>
+        <label>${t('rewardLabel')}</label>
+        <input type="number" id="rewardMin" min="1" max="120" value="${data.rewardMinutes}">
+        <button class="btn-primary" id="saveSchedule">${t('saveSettings')}</button>
+      </div>
+      <div class="card">
+        <h2>${t('blockedAppsTitle')}</h2>
+        <p class="sub">${t('blockedAppsSub')}</p>
+        <div class="chip-input">
+          <input type="text" id="newApp" placeholder="${t('addAppPlaceholder')}">
+          <button id="addApp">${t('add')}</button>
+        </div>
+        <div class="chips" id="appChips">
+          ${data.blockedApps.map((a,i)=>`<span class="chip">${a} <button data-idx="${i}" class="rmApp">✕</button></span>`).join('') || `<span class="empty">${t('noApps')}</span>`}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px;">
+      <div class="card">
+        <h2>${t('addQuestionTitle')}</h2>
+        <p class="sub">${t('addQuestionSub')}</p>
+        
+        <label>${t('subjectLabel')}</label>
+        <select id="newQSubject" style="margin-bottom:12px;">
+          ${subjectsList.map(s => `<option value="${s}">${getSubjectName(s)}</option>`).join('')}
+        </select>
+
+        <label>${t('questionLabel')}</label>
+        <input type="text" id="newQText" placeholder="${t('questionPlaceholder')}">
+        <div style="margin-top:10px;">
+          <div class="newq-opt"><input type="radio" name="corr" value="0" checked><input type="text" class="qopttext" placeholder="${t('answerA')}"></div>
+          <div class="newq-opt"><input type="radio" name="corr" value="1"><input type="text" class="qopttext" placeholder="${t('answerB')}"></div>
+          <div class="newq-opt"><input type="radio" name="corr" value="2"><input type="text" class="qopttext" placeholder="${t('answerC')}"></div>
+          <div class="newq-opt"><input type="radio" name="corr" value="3"><input type="text" class="qopttext" placeholder="${t('answerD')}"></div>
+        </div>
+        <p class="sub" style="margin:2px 0 12px;">${t('correctHint')}</p>
+        <button class="btn-primary" id="addQuestion">${t('addQuestionBtn')}</button>
+      </div>
+
+      <div class="card">
+        <h2>${t('questionListTitle')} (${data.questions.length})</h2>
+        <div id="qlist" style="margin-top:12px;">
+          ${subjectsList.map(subj => {
+            const list = grouped[subj];
+            if(list.length === 0) return '';
+            return `
+              <div class="subject-section">
+                <div class="subject-title"><span>📚 ${getSubjectName(subj)}</span> <span style="font-size:11px;background:#E7EEFF;color:var(--sky);padding:2px 8px;border-radius:999px;">${list.length}</span></div>
+                ${list.map(q=>`
+                  <div class="qitem">
+                    <div class="qtext">${qText(q)}</div>
+                    <div class="qopts">
+                      ${q.options.map((o,i)=>`<div class="qopt ${i===q.correct?'correct':''}">${o}</div>`).join('')}
+                    </div>
+                    <div class="qitem-foot"><button class="delQ" data-id="${q.id}">${t('remove')}</button></div>
+                  </div>`).join('')}
+              </div>`;
+          }).join('') || `<div class="empty">${t('noQuestions')}</div>`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function attachGuardian(){
+  document.getElementById('saveSchedule').addEventListener('click', async ()=>{
+    data.schedule.enabled = document.getElementById('schedEnabled').checked;
+    data.schedule.start = document.getElementById('startTime').value || data.schedule.start;
+    data.schedule.end = document.getElementById('endTime').value || data.schedule.end;
+    data.rewardMinutes = parseInt(document.getElementById('rewardMin').value) || data.rewardMinutes;
+    await saveData(); render();
+  });
+  document.getElementById('addApp').addEventListener('click', async ()=>{
+    const inp = document.getElementById('newApp');
+    if(inp.value.trim()){
+      data.blockedApps.push(inp.value.trim());
+      await saveData(); render();
+    }
+  });
+  document.querySelectorAll('.rmApp').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      data.blockedApps.splice(parseInt(b.dataset.idx),1);
+      await saveData(); render();
+    });
+  });
+  document.getElementById('addQuestion').addEventListener('click', async ()=>{
+    const subject = document.getElementById('newQSubject').value;
+    const text = document.getElementById('newQText').value.trim();
+    const opts = Array.from(document.querySelectorAll('.qopttext')).map(i=>i.value.trim());
+    const corr = parseInt(document.querySelector('input[name=corr]:checked').value);
+    if(!text || opts.some(o=>!o)){ return; }
+    const id = data.questions.length ? Math.max(...data.questions.map(q=>q.id))+1 : 1;
+    data.questions.push({ id, subject, textByLang:{ [currentLang]: text, en: text }, options:opts, correct:corr });
+    await saveData(); render();
+  });
+  document.querySelectorAll('.delQ').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      data.questions = data.questions.filter(q=>q.id!==parseInt(b.dataset.id));
+      await saveData(); render();
+    });
+  });
+}
+
+function childView(){
+  const locked = isLockedNow();
+  let screenHtml;
+  if(locked){
+    const q = pickQuestion();
+    const subjectBadge = q ? getSubjectName(q.subject || 'Math') : '';
+    screenHtml = q ? `
+      <div class="lockscreen">
+        <div class="notch"></div>
+        <div class="lockicon">🔒</div>
+        <h3>${t('lockedTitle')}</h3>
+        <p>${t('lockedDesc')}</p>
+        <div class="qcard">
+          <div class="qlabel">${t('questionTag')} · <span style="color:var(--sky);background:#fff;padding:2px 6px;border-radius:4px;">${subjectBadge}</span></div>
+          <div class="qtext">${qText(q)}</div>
+          ${q.options.map((o,i)=>`<button class="opt" data-idx="${i}" data-correct="${q.correct}">${o}</button>`).join('')}
+          <div class="feedback" id="feedback"></div>
+        </div>
+      </div>` : `
+      <div class="lockscreen">
+        <div class="notch"></div>
+        <div class="lockicon">🔒</div>
+        <h3>${t('lockedTitle')}</h3>
+        <p>${t('noQuestionDesc')}</p>
+      </div>`;
+  } else {
+    const remaining = data.session.unlockedUntil ? data.session.unlockedUntil - Date.now() : null;
+    screenHtml = `
+      <div class="homescreen">
+        <div class="notch"></div>
+        <div class="badge">${t('unlockedBadge')}</div>
+        <h3>${t('correctTitle')}</h3>
+        ${remaining ? `<div class="timer" id="timerDisplay">${fmtCountdown(remaining)}</div><p>${t('bonusTimeLeft')}</p>` : `<p>${t('freeUse')}</p>`}
+        <div class="applist">
+          ${data.blockedApps.slice(0,8).map(a=>`<div class="appicon" title="${a}">📲</div>`).join('') || ''}
+        </div>
+      </div>`;
+  }
+
+  return `
+  <div class="phone-wrap">
+    <div class="phone"><div class="screen">${screenHtml}</div></div>
+    <div class="card" style="width:290px;">
+      <h2 style="font-size:14px;">${t('simTitle')}</h2>
+      <p class="sub">${t('simDesc')}</p>
+      <div class="simbar">
+        <button id="forceLock">${t('lockNow')}</button>
+        <button id="forceUnlock">${t('removeLock')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function attachChild(){
+  document.querySelectorAll('.qcard .opt').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const correct = parseInt(btn.dataset.correct);
+      const fb = document.getElementById('feedback');
+      document.querySelectorAll('.qcard .opt').forEach(b=>b.disabled=true);
+      if(idx===correct){
+        btn.classList.add('right');
+        fb.textContent = t('correctFeedback').replace('{n}', data.rewardMinutes);
+        fb.className = 'feedback ok';
+        data.session.unlockedUntil = Date.now() + data.rewardMinutes*60000;
+        data.session.forceLocked = false;
+        await saveData();
+        setTimeout(render, 900);
+      } else {
+        btn.classList.add('wrong');
+        fb.textContent = t('wrongFeedback');
+        fb.className = 'feedback bad';
+        setTimeout(render, 1100);
+      }
+    });
+  });
+
+  document.getElementById('forceLock').addEventListener('click', async ()=>{
+    data.session.forceLocked = true;
+    data.session.unlockedUntil = null;
+    await saveData(); render();
+  });
+  document.getElementById('forceUnlock').addEventListener('click', async ()=>{
+    data.session.forceLocked = false;
+    data.session.unlockedUntil = Date.now() + data.rewardMinutes*60000;
+    await saveData(); render();
+  });
+
+  if(!isLockedNow() && data.session.unlockedUntil){
+    if(window._sslTick) clearInterval(window._sslTick);
+    window._sslTick = setInterval(()=>{
+      const el = document.getElementById('timerDisplay');
+      if(!el){ clearInterval(window._sslTick); return; }
+      const remaining = data.session.unlockedUntil - Date.now();
+      if(remaining<=0){ clearInterval(window._sslTick); render(); return; }
+      el.textContent = fmtCountdown(remaining);
+    },1000);
+  }
+}
+
+(async function init(){
+  await loadData();
+  render();
+})();
+</script>
+</body>
+</html>
